@@ -39,11 +39,21 @@
 }
 
 /*
- * The icon span — label is appended inside it, so this is the positioning
- * anchor. No width change needed; the span is already icon-sized.
+ * The direct container of a label (iconSpan for guilds, folderButton for folders)
+ * becomes the absolute positioning anchor.
  */
 .vc-serverlabels-active :has(> .vc-serverlabels-name) {
     position: relative;
+    overflow: visible;
+}
+
+/*
+ * For folder labels, the label is inside folderButton, which sits inside
+ * folderHeader → listItem. Both ancestor divs need overflow: visible or they
+ * will clip the absolutely-positioned label.
+ */
+.vc-serverlabels-active :has(> *:has(> .vc-serverlabels-name)),
+.vc-serverlabels-active :has(> *:has(> *:has(> .vc-serverlabels-name))) {
     overflow: visible;
 }
 

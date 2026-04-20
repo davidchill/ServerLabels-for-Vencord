@@ -1,5 +1,15 @@
 # ServerLabels Changelog
 
+## [0.1.3] — 2026-04-20
+
+### Folder name labels
+
+- Folder names now appear next to folder icons in the guild sidebar, matching the same pill style as server labels
+- Fixed folder data field names: `SortedGuildStore` returns `folderId`, `folderName`, and `folderColor` — not `id`, `name`, and `color`; this also corrected folder color tinting on server labels inside colored folders (was broken since v0.1.1)
+- Fixed folder ID format: Discord's `data-list-item-id` for folders is `guildsnav___NUMERICID` (no `folder-` prefix), not `guildsnav___folder-NUMERICID` as previously assumed
+- Changed DOM strategy for folder label injection: folder items have no `<span>` ancestor, so the label is now appended directly into the `folderButton` element (the treeitem itself) rather than via an upward SPAN walk
+- Added two nested CSS `:has()` rules to propagate `overflow: visible` from `folderButton` up through `folderHeader` and `listItem`, preventing those ancestor divs from clipping the absolutely-positioned label
+
 ## [0.1.2] — 2026-04-20
 
 ### Icon vertical alignment fix

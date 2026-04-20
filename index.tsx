@@ -54,7 +54,7 @@ function getFolderColor(guildId: string): string | null {
     try {
         const folders: any[] = SortedGuildStore.getGuildFolders?.() ?? [];
         const folder = folders.find(f => f.guildIds?.includes(guildId));
-        const color: number | null | undefined = folder?.color;
+        const color: number | null | undefined = folder?.folderColor;
         if (!color) return null;
         return `#${color.toString(16).padStart(6, "0")}`;
     } catch {
@@ -68,6 +68,40 @@ function getFolderColor(guildId: string): string | null {
  * the label as a sibling inside the existing listItem flex row —
  * without wrapping or moving any of Discord's original elements.
  */
+function injectFolderLabel(treeitem: Element) {
+    const rawId = treeitem.getAttribute("data-list-item-id") ?? "";
+    if (!rawId.startsWith("guildsnav___")) return;
+
+    const idStr = rawId.slice("guildsnav___".length);
+    const idNum = Number(idStr);
+    // Folder IDs are plain integers (~10 digits); guild snowflakes are 18-19 digits.
+    // Reject anything that's not a finite positive integer, or looks like a guild snowflake.
+    if (!Number.isFinite(idNum) || idNum <= 0 || idStr.length > 15) return;
+
+    try {
+        const folders: any[] = SortedGuildStore.getGuildFolders?.() ?? [];
+        const folder = folders.find(f => f.folderId === idNum);
+        if (!folder?.folderName) return;
+
+        // Folder DOM has no <span> ancestor. The treeitem itself is the folderButton,
+        // which is the icon area — append label directly inside it.
+        if (treeitem.querySelector(`.${LABEL_CLASS}`)) return;
+
+        const label = document.createElement("span");
+        label.className = LABEL_CLASS;
+        label.textContent = folder.folderName;
+
+        if (folder.folderColor) {
+            label.style.setProperty("--serverlabels-folder-color", `#${folder.folderColor.toString(16).padStart(6, "0")}`);
+            label.dataset.hasColor = "true";
+        }
+
+        treeitem.appendChild(label);
+    } catch {
+        return;
+    }
+}
+
 function injectLabel(treeitem: Element) {
     const rawId = treeitem.getAttribute("data-list-item-id") ?? "";
     const guildId = rawId.startsWith("guildsnav___") ? rawId.slice("guildsnav___".length) : null;
@@ -117,7 +151,9 @@ function injectLabel(treeitem: Element) {
 
 function applyAllLabels() {
     document.querySelectorAll(TREEITEM_SELECTOR).forEach(injectLabel);
+    document.querySelectorAll(TREEITEM_SELECTOR).forEach(injectFolderLabel);
 }
+
 
 function removeAllLabels() {
     document.querySelectorAll(`.${LABEL_CLASS}`).forEach(el => el.remove());
