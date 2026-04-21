@@ -2,9 +2,14 @@
 
 ## [0.1.5] — 2026-04-20
 
-### Rectangular label style and tooltip suppression
+### Label polish and folder tree lines
 
-- Changed label shape from pill (`border-radius: 100px`) to rectangular button (`border-radius: 4px`); top/bottom padding bumped from `3px` to `4px` for better visual balance
+- Changed label shape from pill (`border-radius: 100px`) to rectangular button (`border-radius: 4px`)
+- Increased label padding to `5px 12px` (from `3px 10px`) for more breathing room around the text
+- Added `min-width: 120px` so short server names get the same baseline pill size instead of a tiny sliver — improves size consistency across all labels
+- Added tree branch connector lines for servers inside folders: an L-shaped `::before` element (vertical + horizontal border) is drawn on the icon span to the left of each folder-server label, visually indicating nesting
+- Added `isInFolder()` helper in `index.tsx` that checks `SortedGuildStore` for folder membership; sets `data-in-folder="true"` on the label so the connector CSS can target it without touching folder-color logic
+- Connector is drawn via `:has(> [data-in-folder="true"])::before` on the iconSpan rather than `::before` on the label itself — the label has `overflow: hidden` for text ellipsis which would clip a pseudo-element placed on it directly
 - Added CSS rule to suppress Discord's portal-rendered hover tooltips (`div[id^="uid_"]`, direct children of `<body>`) while the cursor is anywhere inside the guild nav sidebar, using a `:has(nav:hover)` body-level selector scoped to `vc-serverlabels-active`
 - Added `suppressNativeTooltip()` helper in `index.tsx` that strips `title` HTML attributes and SVG `<title>` child elements from each guild nav treeitem on label injection, eliminating native browser tooltips that appeared over small portions of server/folder icons
 

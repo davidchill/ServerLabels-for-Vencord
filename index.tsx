@@ -68,6 +68,15 @@ function getFolderColor(guildId: string): string | null {
     }
 }
 
+function isInFolder(guildId: string): boolean {
+    try {
+        const folders: any[] = SortedGuildStore.getGuildFolders?.() ?? [];
+        return folders.some(f => f.folderId != null && f.guildIds?.includes(guildId));
+    } catch {
+        return false;
+    }
+}
+
 /**
  * Injects a label into a single guild treeitem's listItem container.
  * Walks up from the treeitem to find the icon <span>, then appends
@@ -153,6 +162,10 @@ function injectLabel(treeitem: Element) {
     if (folderColor) {
         label.style.setProperty("--serverlabels-folder-color", folderColor);
         label.dataset.hasColor = "true";
+    }
+
+    if (isInFolder(guildId)) {
+        label.dataset.inFolder = "true";
     }
 
     label.addEventListener("click", e => {
