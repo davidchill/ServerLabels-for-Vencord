@@ -1,5 +1,13 @@
 # ServerLabels Changelog
 
+## [0.1.8] — 2026-04-21
+
+### Observer and label injection optimizations
+
+- **`applyAllLabels()` now queries the DOM once** — previously called `document.querySelectorAll(TREEITEM_SELECTOR)` twice (once for `injectLabel`, once for `injectFolderLabel`), building and iterating the full NodeList twice per call; merged into a single query with both inject functions called per element
+- **MutationObserver now processes only newly added nodes** — previously the observer detected whether any added node was a guild treeitem and then called `applyAllLabels()`, re-scanning the entire guild list on every mutation; the callback now iterates `mutation.addedNodes` directly, calling `injectLabel` and `injectFolderLabel` only on each new treeitem (or treeitems found within it); both functions already guard against double-injection so processing the same element twice is harmless
+- **Removed `applyRafId` RAF debounce** — was introduced in v0.1.7 to coalesce rapid `applyAllLabels()` calls; no longer needed because the observer no longer calls `applyAllLabels()` at all; `applyAllLabels()` is retained for the synchronous initial call in `start()`
+
 ## [0.1.7] — 2026-04-21
 
 ### Performance fixes (MutationObserver, label cache, RAF debounce)

@@ -48,7 +48,6 @@ let observer: MutationObserver | null = null;
 let navBootstrapObserver: MutationObserver | null = null;
 let styleEl: HTMLStyleElement | null = null;
 let rafId: number | null = null;
-let applyRafId: number | null = null;
 
 const activeLabels = new Set<HTMLElement>();
 
@@ -239,8 +238,10 @@ function injectLabel(treeitem: Element) {
 }
 
 function applyAllLabels() {
-    document.querySelectorAll(TREEITEM_SELECTOR).forEach(injectLabel);
-    document.querySelectorAll(TREEITEM_SELECTOR).forEach(injectFolderLabel);
+    document.querySelectorAll(TREEITEM_SELECTOR).forEach(el => {
+        injectLabel(el);
+        injectFolderLabel(el);
+    });
 }
 
 function removeAllLabels() {
@@ -273,20 +274,16 @@ export default definePlugin({
         observer = new MutationObserver(mutations => {
             for (const mutation of mutations) {
                 if (mutation.type !== "childList") continue;
-                const hasNewGuildNodes = [...mutation.addedNodes].some(n =>
-                    n instanceof Element && (
-                        n.matches(TREEITEM_SELECTOR) ||
-                        n.querySelector?.(TREEITEM_SELECTOR) != null
-                    )
-                );
-                if (hasNewGuildNodes) {
-                    if (applyRafId === null) {
-                        applyRafId = requestAnimationFrame(() => {
-                            applyRafId = null;
-                            applyAllLabels();
-                        });
+                for (const node of mutation.addedNodes) {
+                    if (!(node instanceof Element)) continue;
+                    if (node.matches(TREEITEM_SELECTOR)) {
+                        injectLabel(node);
+                        injectFolderLabel(node);
                     }
-                    break;
+                    node.querySelectorAll(TREEITEM_SELECTOR).forEach(el => {
+                        injectLabel(el);
+                        injectFolderLabel(el);
+                    });
                 }
             }
         });
@@ -315,7 +312,6 @@ export default definePlugin({
         document.removeEventListener("click", onDocumentClick, true);
         document.removeEventListener("mousemove", onDocumentMouseMove);
         if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
-        if (applyRafId !== null) { cancelAnimationFrame(applyRafId); applyRafId = null; }
         navBootstrapObserver?.disconnect();
         navBootstrapObserver = null;
         observer?.disconnect();
