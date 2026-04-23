@@ -249,13 +249,20 @@ function removeAllLabels() {
 }
 
 function refreshLabelColors() {
-    // Discord may re-render the nav element when folder settings change; re-query to avoid a stale reference.
+    // Discord may replace the nav element on theme/settings changes — reconnect the observer if so.
     const nav = document.querySelector('nav[class*="guilds"]');
-    if (nav) guildsNav = nav as HTMLElement;
+    if (nav && nav !== guildsNav) {
+        guildsNav = nav as HTMLElement;
+        observer?.disconnect();
+        observer?.observe(guildsNav, { childList: true, subtree: true });
+        applyAllLabels();
+    } else if (nav) {
+        guildsNav = nav as HTMLElement;
+    }
     try {
         const folders: any[] = SortedGuildStore.getGuildFolders?.() ?? [];
         for (const el of activeLabels) {
-            if (!el.isConnected) continue;
+            if (!el.isConnected) { activeLabels.delete(el); continue; }
             let colorHex: string | null = null;
             if (el.dataset.folderId) {
                 const idNum = Number(el.dataset.folderId);

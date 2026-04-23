@@ -66,7 +66,7 @@
 
 /* Servers inside a folder get a tree branch connector before the label */
 .vc-serverlabels-name[data-in-folder="true"] {
-    margin-left: 18px;
+    margin-left: 23px;
 }
 
 /*
@@ -91,6 +91,23 @@
 /* Colored variant — uses the folder color set as an inline CSS variable */
 .vc-serverlabels-name[data-has-color="true"] {
     background-color: var(--serverlabels-folder-color);
+    color: #ffffff;
+}
+
+/*
+ * Light theme overrides — Discord adds .theme-light to the <html> element.
+ * The base rule swaps to dark text on a subtle dark-tinted background.
+ * The [data-has-color] rule restores the folder color and white text —
+ * it needs the extra attribute selector to beat the base rule's specificity.
+ */
+.theme-light .vc-serverlabels-name {
+    color: #060607;
+    background-color: rgba(0, 0, 0, 0.12);
+}
+
+.theme-light .vc-serverlabels-name[data-has-color="true"] {
+    background-color: var(--serverlabels-folder-color);
+    color: #ffffff;
 }
 
 /*

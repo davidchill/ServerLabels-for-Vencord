@@ -1,5 +1,15 @@
 # ServerLabels Changelog
 
+## [0.1.10] — 2026-04-22
+
+### Light theme support, observer stability, and nested server indentation
+
+- **Light theme support** — added `.theme-light .vc-serverlabels-name` override in `style.css` that sets `color: #060607` and `background-color: rgba(0, 0, 0, 0.12)`; the dark-mode base rule (`color: #ffffff`, `background-color: rgba(255, 255, 255, 0.1)`) is unchanged; a companion `.theme-light .vc-serverlabels-name[data-has-color="true"]` rule explicitly restores the folder color and white text for colored labels, which was required to beat the base light-theme rule on specificity; Discord's `.theme-light` class on the `<html>` element is used as the theme signal rather than CSS variables, which were found to not resolve reliably in this context
+- **Explicit `color: #ffffff` on colored labels** — added to the `.vc-serverlabels-name[data-has-color="true"]` rule to guarantee pure white text on vivid folder-color backgrounds in both themes; previously the base `color: #ffffff` applied by inheritance but was fragile once per-theme overrides were introduced
+- **Observer reconnects when Discord replaces the nav element** — `refreshLabelColors()` now detects when `document.querySelector('nav[class*="guilds"]')` returns a different element than the stored `guildsNav` reference, disconnects the old `MutationObserver`, reattaches it to the new nav, and calls `applyAllLabels()` to re-inject labels into the fresh DOM; previously the observer silently stopped receiving mutations after a nav replacement (e.g. after a theme switch), breaking label injection until the plugin was restarted
+- **Disconnected label pruning in `refreshLabelColors()`** — `activeLabels.delete(el)` is now called when a disconnected entry is found during the color refresh loop, matching the pruning behaviour already present in the `MutationObserver` callback and `labelAtPoint()`; previously the loop only skipped stale entries with `continue`, leaving them in the set indefinitely
+- **Increased nested server indentation** — `margin-left` on `.vc-serverlabels-name[data-in-folder="true"]` increased from `18px` to `23px` to make the visual hierarchy between folder labels and their member servers more distinct
+
 ## [0.1.9] — 2026-04-22
 
 ### Medium-priority review fixes + live folder color refresh
