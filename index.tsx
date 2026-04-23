@@ -34,8 +34,8 @@ const settings = definePluginSettings({
     maxWidth: {
         type: OptionType.SLIDER,
         description: "Max width of server name labels (px)",
-        default: 150,
-        markers: [80, 100, 120, 150, 180, 200],
+        default: 160,
+        markers: [80, 100, 120, 150, 160, 180, 200],
         onChange: () => updateCSSVars(),
     },
 });
@@ -60,6 +60,33 @@ function updateCSSVars() {
         --serverlabels-font-weight: ${settings.store.fontWeight};
         --serverlabels-max-width: ${settings.store.maxWidth}px;
     }`;
+    // Re-measure after layout settles — max-width changes affect overflow amounts.
+    requestAnimationFrame(remeasureAllMarquees);
+}
+
+/**
+ * Measures how far the inner text span overflows its pill container and stores
+ * the result as --marquee-offset. Adds vc-serverlabels-overflow when text is
+ * actually clipped so the fade mask and animation only apply when needed.
+ */
+function measureMarquee(label: HTMLElement) {
+    if (!label.isConnected) return;
+    const inner = label.querySelector("span") as HTMLElement | null;
+    if (!inner) return;
+    const overflow = inner.scrollWidth - (label.clientWidth - 24); // 24 = 12px padding × 2
+    if (overflow > 2) {
+        label.style.setProperty("--marquee-offset", `-${overflow}px`);
+        label.classList.add("vc-serverlabels-overflow");
+    } else {
+        label.style.removeProperty("--marquee-offset");
+        label.classList.remove("vc-serverlabels-overflow");
+    }
+}
+
+function remeasureAllMarquees() {
+    for (const el of activeLabels) {
+        if (el.isConnected) measureMarquee(el);
+    }
 }
 
 function getFolderColor(guildId: string): string | null {
@@ -130,7 +157,7 @@ function onDocumentMouseMove(e: MouseEvent) {
         rafId = null;
         const hovered = labelAtPoint(e.clientX, e.clientY);
         for (const el of activeLabels) {
-            if (el.dataset.guildId) el.classList.toggle(LABEL_HOVER_CLASS, el === hovered);
+            el.classList.toggle(LABEL_HOVER_CLASS, el === hovered);
         }
         if (guildsNav) guildsNav.style.cursor = hovered ? "pointer" : "";
     });
@@ -163,8 +190,10 @@ function injectFolderLabel(treeitem: Element) {
 
         const label = document.createElement("span");
         label.className = LABEL_CLASS;
-        label.textContent = folder.folderName;
         label.dataset.folderId = idStr;
+        const folderInner = document.createElement("span");
+        folderInner.textContent = folder.folderName;
+        label.appendChild(folderInner);
 
         if (folder.folderColor) {
             label.style.setProperty("--serverlabels-folder-color", `#${folder.folderColor.toString(16).padStart(6, "0")}`);
@@ -173,6 +202,7 @@ function injectFolderLabel(treeitem: Element) {
 
         treeitem.appendChild(label);
         activeLabels.add(label);
+        requestAnimationFrame(() => measureMarquee(label));
     } catch {
         return;
     }
@@ -213,10 +243,12 @@ function injectLabel(treeitem: Element) {
 
     const label = document.createElement("span");
     label.className = LABEL_CLASS;
-    label.textContent = guild.name;
     label.setAttribute("aria-label", guild.name);
     // Store the guild ID so the document-level click handler can navigate.
     label.dataset.guildId = guildId;
+    const inner = document.createElement("span");
+    inner.textContent = guild.name;
+    label.appendChild(inner);
 
     if (folderColor) {
         label.style.setProperty("--serverlabels-folder-color", folderColor);
@@ -247,6 +279,7 @@ function injectLabel(treeitem: Element) {
     // listeners registered in start() to avoid triggering Discord's tooltip.
     iconSpan.appendChild(label);
     activeLabels.add(label);
+    requestAnimationFrame(() => measureMarquee(label));
 }
 
 function applyAllLabels() {

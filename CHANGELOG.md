@@ -1,5 +1,18 @@
 # ServerLabels Changelog
 
+## [0.1.12] — 2026-04-22
+
+### Marquee scroll on hover, rounded standalone server labels, Max Width default bump
+
+- **Max Width default raised to 160px** — slider default changed from 150px to 160px; 160px added as an explicit marker on the slider
+- **Marquee scroll on hover for truncated labels** — labels that overflow their max-width now scroll horizontally to reveal the full name when hovered; JS measures actual overflow after each label is inserted and stores it as a `--marquee-offset` CSS custom property; the CSS `@keyframes vc-serverlabels-marquee` animation translates the inner text span by that amount using `ease-in-out infinite alternate` (bounces back and forth while hovered); labels where text fits within the max-width get `--marquee-offset: 0px` and no class, so no animation fires
+- **Right-edge fade signals truncation** — labels with actual overflow receive the `vc-serverlabels-overflow` class, which applies a `mask-image` gradient fade on the right edge when not hovered; the fade is removed on hover so the scrolling text is fully visible as it passes through; labels without overflow never receive the class, so short labels keep a clean right edge
+- **Label text wrapped in inner `<span>`** — required for marquee: the outer label pill has `overflow: hidden` to clip text, and the inner span translates independently; `aria-label` remains on the outer element for accessibility
+- **Marquee re-measures on Max Width setting change** — `updateCSSVars()` triggers `requestAnimationFrame(remeasureAllMarquees)` after updating the CSS variable so overflow amounts stay accurate as the slider is adjusted
+- **Marquee start delay halved** — initial pause before scrolling begins reduced from 15% to 8% of the 3s animation duration (~0.45s → ~0.24s); end pause adjusted symmetrically (85% → 92%)
+- **Folder labels now scroll on hover** — `onDocumentMouseMove` was guarding hover-class toggling behind `el.dataset.guildId`, excluding folder labels; guard removed so both server and folder labels receive `vc-serverlabels-name--hover` and trigger the marquee animation
+- **Standalone server labels adopt rounded corners** — `.vc-serverlabels-name[data-guild-id]:not([data-in-folder])` now has `border-radius: 16px` to match the rounder folder label style; height remains 42px (not bumped to 48px like folder labels) since standalone server icons are smaller and 48px caused overlap
+
 ## [0.1.11] — 2026-04-22
 
 ### Visual overhaul — label backgrounds, folder transparency, and gap equalization
