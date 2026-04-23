@@ -17,8 +17,7 @@
     display: inline-flex;
     align-items: center;
     padding: 0 12px;
-    border-radius: 0 4px 4px 0;
-    min-width: 120px;
+    border-radius: 4px;
 
     /* Default background for servers not in a colored folder */
     background-color: rgba(255, 255, 255, 0.1);
@@ -33,8 +32,8 @@
     left: 100%;
     top: 50%;
     transform: translateY(-50%);
-    height: 42px;
-    margin-left: 0;
+    height: 32px;
+    margin-left: 8px;
 
     /*
      * pointer-events: none makes all labels invisible to Discord's event system
@@ -64,13 +63,12 @@
 }
 
 /*
- * Folder labels: height matches the 48×48 folderPreviewWrapper exactly.
- * Standalone server labels: same rounder border-radius but original 42px height —
- * their icons are smaller than folder icons, so 48px causes overlap.
- * In-folder servers keep the original 42px/4px styling.
+ * Folder labels: 38px — reduced from the 48px folderPreviewWrapper height to reduce empty space.
+ * Standalone server labels: 32px base height, border-radius: 16px to match folder style.
+ * In-folder servers: 39px — slightly taller than standalone to fill the row better.
  */
 .vc-serverlabels-name[data-folder-id] {
-    height: 48px;
+    height: 38px;
     border-radius: 16px;
 }
 
@@ -84,6 +82,7 @@
 .vc-serverlabels-name[data-in-folder="true"] {
     margin-left: 23px;
     border-radius: 4px;
+    height: 39px;
 }
 
 /*
@@ -205,7 +204,7 @@
 }
 
 /* Push the first server row down to match the inter-server gap.
-   The folder label (48px) is taller than server labels (42px), so without this
+   The folder label is taller than standalone server labels, so without this
    the visual gap between folder→first server is smaller than server→server. */
 .vc-serverlabels-active ul[id^="folder-items-"] > :first-child {
     margin-top: 4px;

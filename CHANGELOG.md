@@ -1,5 +1,16 @@
 # ServerLabels Changelog
 
+## [0.1.13] — 2026-04-23
+
+### Label detachment, dynamic width, and height reductions
+
+- **Labels detached from icons** — `margin-left` changed from `0` to `8px`, creating a visual gap between the icon and label; the flat left edge (`border-radius: 0 4px 4px 0`) was replaced with fully rounded corners (`border-radius: 4px`) since flush attachment is no longer needed
+- **Dynamic label width** — removed `min-width: 120px`; labels now size to their text content and only reach `max-width` before the marquee kicks in; short server names produce compact labels, long names expand naturally up to the cap
+- **Standalone server label height reduced** — base `height` changed from `42px` to `32px`; reduces empty vertical space in the label background
+- **Folder label height reduced** — `height` changed from `48px` to `38px`; brings folder labels closer in proportion to the new standalone server label height
+- **In-folder server label height set explicitly** — `height: 39px` added to the `[data-in-folder="true"]` rule; was previously inheriting the base height, now explicitly set to remain slightly taller than standalone labels
+- **Stale CSS comments updated** — inline comments referencing the old `48px`/`42px` heights updated to reflect current values
+
 ## [0.1.12] — 2026-04-22
 
 ### Marquee scroll on hover, rounded standalone server labels, Max Width default bump
