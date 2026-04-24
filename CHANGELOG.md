@@ -1,5 +1,16 @@
 # ServerLabels Changelog
 
+## [0.1.16] — 2026-04-23
+
+### Code review nitpick fixes
+
+- **`index.tsx` renamed to `index.ts`** — the file contained zero JSX across 463 lines; the `.tsx` extension was misleading; renamed via `git mv` with no functional change
+- **`pruneLabel()` now cleans up empty Map entries** — when the last label for a folder was removed from `labelsByFolder`, the Map entry remained with an empty `Set`; after `s.delete(el)`, a size check now removes the Map entry entirely if the Set is empty; functionally harmless previously but a minor memory leak in long sessions
+- **Light theme folder color opacity bumped** — dark folder colors (dark blue, purple) at 40% opacity on Discord's white background had insufficient contrast; closed-state opacity raised from 40% to 60%, open-state from 20% to 40%; dark theme values unchanged
+- **README changelog path corrected** — link pointed to `Vencord/src/plugins/serverLabels/CHANGELOG.md`; corrected to `Vencord/src/userplugins/serverLabels/CHANGELOG.md` to match the actual installation path
+- **README updated** — `index.tsx` → `index.ts` in installation instructions; "How It Works" updated to reflect new light-theme opacity values; current version bumped; bundle checklist added to `CLAUDE.md`
+- **CSS comments updated** — two comments in `style.css` still referenced `index.tsx`; corrected to `index.ts`
+
 ## [0.1.15] — 2026-04-23
 
 ### Height adjustment and README refresh

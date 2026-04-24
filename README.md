@@ -28,7 +28,7 @@ This plugin is installed as a Vencord [user plugin](https://docs.vencord.dev/plu
    ```
    Vencord/src/userplugins/serverLabels/
    ```
-   The folder should contain `index.tsx`, `style.css`, and `README.md`.
+   The folder should contain `index.ts`, `style.css`, and `README.md`.
 3. Rebuild Vencord from the repo root:
    ```
    pnpm build
@@ -57,16 +57,16 @@ Key implementation details:
 - **DOM injection** — Labels are appended inside the icon `<span>` (not after it), making the icon span the absolute positioning anchor. This preserves Discord's native icon centering without any layout hacks.
 - **pointer-events: none** — Labels are invisible to Discord's event system. Clicks and hover effects are handled by document-level listeners that check bounding rects manually (`labelAtPoint()`). This is the only reliable way to suppress Discord's React-delegated tooltips.
 - **CSS variable injection** — Settings are written into a `<style>` tag in `<head>` rather than inline on `document.documentElement`. Discord periodically rewrites the root element's `style` attribute for its own theming, which would silently wipe inline custom properties.
-- **Folder color** — `SortedGuildStore` is used to look up each guild's parent folder and extract `folderColor` (a raw integer), which is converted to a hex CSS string and applied as an inline `--serverlabels-folder-color` variable. Opacity is 40% when the folder is closed, 20% when open — driven by `aria-expanded` observation rather than CSS structural selectors (which can't reach sibling subtrees).
+- **Folder color** — `SortedGuildStore` is used to look up each guild's parent folder and extract `folderColor` (a raw integer), which is converted to a hex CSS string and applied as an inline `--serverlabels-folder-color` variable. In dark theme, opacity is 40% closed / 20% open; in light theme it's bumped to 60% / 40% so dark folder colors remain legible on Discord's white background. State is driven by `aria-expanded` observation rather than CSS structural selectors (which can't reach sibling subtrees).
 - **Folder open state sync** — The observer watches `aria-expanded` attribute changes on folder treeitems. A `Map<folderId, Set<label>>` index makes each sync an O(1) lookup rather than a full scan of all active labels.
 - **Marquee scroll** — After each label is injected, `measureMarquee()` runs in a `requestAnimationFrame` to check whether the text overflows the pill width. If it does, `--marquee-offset` is set and a CSS animation scrolls the inner text span left-to-right on hover. Re-measurement is batched into a read pass then a write pass to avoid layout thrashing.
 - **Light theme** — Discord adds `.theme-light` to `<html>` when the light theme is active. The CSS uses this class to switch labels to dark text on a subtle dark-tinted background.
 
 ## Changelog
 
-See [CHANGELOG.md](Vencord/src/plugins/serverLabels/CHANGELOG.md) for the full version history.
+See [CHANGELOG.md](Vencord/src/userplugins/serverLabels/CHANGELOG.md) for the full version history.
 
-**Current version: v0.1.14**
+**Current version: v0.1.16**
 
 ## License
 

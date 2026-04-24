@@ -58,7 +58,10 @@ const labelsByFolder = new Map<string, Set<HTMLElement>>();
 function pruneLabel(el: HTMLElement) {
     activeLabels.delete(el);
     const fid = el.dataset.parentFolderId;
-    if (fid) labelsByFolder.get(fid)?.delete(el);
+    if (fid) {
+        const s = labelsByFolder.get(fid);
+        if (s) { s.delete(el); if (s.size === 0) labelsByFolder.delete(fid); }
+    }
 }
 
 /** Reads settings and writes them into an injected <style> tag so Discord can't wipe them. */

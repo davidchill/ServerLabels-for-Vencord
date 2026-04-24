@@ -38,7 +38,7 @@
     /*
      * pointer-events: none makes all labels invisible to Discord's event system
      * so hovering them never triggers the tooltip. Clicks and hover effects are
-     * handled by document-level listeners in index.tsx instead.
+     * handled by document-level listeners in index.ts instead.
      */
     pointer-events: none;
 }
@@ -132,8 +132,14 @@
 }
 
 .theme-light .vc-serverlabels-name[data-has-color="true"] {
+    /* 60% opacity (vs 40% in dark theme) — dark folder colors need more saturation for legibility on light backgrounds */
+    background-color: color-mix(in srgb, var(--serverlabels-folder-color) 60%, transparent);
+}
+
+/* Open-state overrides for light theme — bump from 20% to 40% for the same reason */
+.theme-light [aria-expanded="true"] > .vc-serverlabels-name[data-has-color="true"],
+.theme-light .vc-serverlabels-name.vc-serverlabels-folder-open[data-has-color="true"] {
     background-color: color-mix(in srgb, var(--serverlabels-folder-color) 40%, transparent);
-    /* Dark text from the base light theme rule — white text on a transparent background has no contrast */
 }
 
 /* Inner text span — must be inline-block so transform animates it independently */
@@ -152,7 +158,7 @@
 }
 
 /*
- * Hover and active states are driven by JS (document mousemove in index.tsx)
+ * Hover and active states are driven by JS (document mousemove in index.ts)
  * since pointer-events: none prevents CSS :hover from firing.
  */
 .vc-serverlabels-name--hover {
