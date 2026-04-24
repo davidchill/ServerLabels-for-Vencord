@@ -8,6 +8,7 @@
 .vc-serverlabels-name {
     font-size: var(--serverlabels-font-size, 14px);
     font-weight: var(--serverlabels-font-weight, 400);
+    font-family: var(--serverlabels-font-family, var(--font-primary));
     max-width: var(--serverlabels-max-width, 160px);
     color: #ffffff;
     white-space: nowrap;
@@ -17,7 +18,7 @@
     display: inline-flex;
     align-items: center;
     padding: 0 12px;
-    border-radius: 4px;
+    border-radius: var(--serverlabels-radius, 16px);
 
     /* Default background for servers not in a colored folder */
     background-color: rgba(255, 255, 255, 0.1);
@@ -69,19 +70,13 @@
  */
 .vc-serverlabels-name[data-folder-id] {
     height: 38px;
-    border-radius: 16px;
 }
 
-/* Standalone servers use the rounder radius to match folder style,
-   but keep the original height to avoid overlapping the smaller icons. */
-.vc-serverlabels-name[data-guild-id]:not([data-in-folder]) {
-    border-radius: 16px;
-}
+/* Standalone server height matches base rule; no border-radius override needed. */
 
 /* Servers inside a folder get a tree branch connector before the label */
 .vc-serverlabels-name[data-in-folder="true"] {
     margin-left: 23px;
-    border-radius: 4px;
     height: 34px;
 }
 
@@ -102,6 +97,11 @@
     border-bottom: 1.5px solid var(--text-muted);
     border-bottom-left-radius: 2px;
     pointer-events: none;
+}
+
+/* Hides the L-shaped connector when the showTreeConnector setting is off */
+.vc-serverlabels-no-connector :has(> .vc-serverlabels-name[data-in-folder="true"])::before {
+    display: none;
 }
 
 /* Colored variant — folder color at ~40% opacity to match the folder icon transparency */
@@ -140,6 +140,14 @@
 .theme-light [aria-expanded="true"] > .vc-serverlabels-name[data-has-color="true"],
 .theme-light .vc-serverlabels-name.vc-serverlabels-folder-open[data-has-color="true"] {
     background-color: color-mix(in srgb, var(--serverlabels-folder-color) 40%, transparent);
+}
+
+/*
+ * User-specified font color — placed after the light-theme rules so it wins in the
+ * cascade at equal specificity. Only applied when the user sets a non-empty fontColor.
+ */
+.vc-serverlabels-custom-color .vc-serverlabels-name {
+    color: var(--serverlabels-color);
 }
 
 /* Inner text span — must be inline-block so transform animates it independently */
@@ -192,10 +200,12 @@
    everything to the right of the icon column.
    ============================================================ */
 
-/* Top-level guild sidebar */
+/* Top-level guild sidebar — scales with the max-width setting.
+   Offset: ~80px icon column + 8px gap + 12px buffer = 100px.
+   At the default maxWidth of 160px this equals the previous hardcoded 260/300px. */
 .vc-serverlabels-active nav:has(.vc-serverlabels-name) {
-    min-width: 260px;
-    max-width: 300px;
+    min-width: calc(var(--serverlabels-max-width, 160px) + 100px);
+    max-width: calc(var(--serverlabels-max-width, 160px) + 140px);
     overflow: visible;
 }
 
@@ -214,4 +224,57 @@
    the visual gap between folder→first server is smaller than server→server. */
 .vc-serverlabels-active ul[id^="folder-items-"] > :first-child {
     margin-top: 4px;
+}
+
+/* ============================================================
+   Font Family Picker — settings panel component
+   Backgrounds use hardcoded hex fallbacks because CSS variables
+   may not resolve inside Vencord's settings panel context.
+   ============================================================ */
+
+.vc-serverlabels-font-trigger {
+    background: var(--background-tertiary, #1e1f22);
+    border: 1px solid var(--background-modifier-accent, #3f4248);
+    border-radius: 4px;
+    padding: 8px 12px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    user-select: none;
+    color: var(--text-normal, #dbdee1);
+}
+
+.vc-serverlabels-font-trigger:hover {
+    background: var(--background-modifier-hover, #2e3035);
+}
+
+.vc-serverlabels-font-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: var(--background-tertiary, #1e1f22);
+    border: 1px solid var(--background-modifier-accent, #3f4248);
+    border-radius: 4px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.vc-serverlabels-font-option {
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text-normal, #dbdee1);
+}
+
+.vc-serverlabels-font-option:hover {
+    background: var(--background-modifier-hover, rgba(255, 255, 255, 0.06));
+}
+
+.vc-serverlabels-font-option.vc-serverlabels-font-option--selected {
+    background: var(--background-modifier-selected, rgba(255, 255, 255, 0.1));
 }

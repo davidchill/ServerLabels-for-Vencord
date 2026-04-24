@@ -1,5 +1,24 @@
 # ServerLabels Changelog
 
+## [0.2.1] — 2026-04-23
+
+### Settings & QoL — corner radius, connector toggle, auto-collapse, font family picker, font color, sidebar auto-scaling
+
+**New settings**
+- **Corner radius** (`labelRadius`) — SELECT: Pill (16px), Rounded (8px), Sharp (4px); defaults to Pill; applies uniformly to all label types via `--serverlabels-radius` CSS variable; removed the three separate hardcoded `border-radius` overrides from `style.css` that previously set each label type independently
+- **Show tree connector** (`showTreeConnector`) — BOOLEAN (default on); toggles the L-shaped branch connector drawn before in-folder server labels; implemented via `vc-serverlabels-no-connector` body class toggled on `onChange` and applied in `start()`; cleaned up in `stop()`
+- **Auto-collapse folder** (`autoCollapseFolder`) — BOOLEAN (default off); when a server label inside a folder is clicked, programmatically clicks the parent folder treeitem to collapse it if currently expanded; logic added inside `onDocumentClick` after `NavigationRouter.transitionToGuild()`
+- **Font family** (`fontFamily`) — `OptionType.COMPONENT` backed by a custom `FontFamilyPicker` React component; 17 options across four categories — Discord Default (no load), Clean & Modern (Inter, Roboto, Poppins, Nunito, DM Sans, Lato), Bold & Dramatic (Oswald, Bebas Neue), Stylish (Playfair Display), Fun & Expressive (Pacifico, Lobster, Dancing Script, Righteous, Bangers), Techy (Space Mono, Press Start 2P); all Google Fonts are pre-loaded via `loadAllFonts()` at plugin start so every option renders in its own font immediately; the picker dropdown shows each font name styled in that font; selection writes directly to `settings.store.fontFamily` and calls `updateCSSVars()`; `unloadAllFonts()` removes all `<link>` tags on `stop()`
+- **Font color** (`fontColor`) — STRING (default empty); accepts any CSS color value; when non-empty, writes `--serverlabels-color` to the CSS vars tag and adds `vc-serverlabels-custom-color` body class, which overrides the theme-adaptive defaults (dark: white, light: `#060607`) via a cascade-ordered rule in `style.css`; empty value preserves existing theme-adaptive behavior with no regression
+
+**QoL improvements**
+- **Sidebar width auto-scales with Max Width setting** — replaced hardcoded `min-width: 260px; max-width: 300px` on the guild nav with `calc(var(--serverlabels-max-width, 160px) + 100px)` / `+ 140px`; at the default 160px max-width the values are identical to the previous hardcoded values; dragging the slider now also widens or narrows the sidebar proportionally
+- **Font picker dropdown visibility fix** — initial inline-style approach (`var(--input-background)`, `var(--background-floating)`) produced transparent backgrounds in Vencord's settings panel context; moved trigger, dropdown, and option styles into `style.css` as CSS classes (`.vc-serverlabels-font-trigger`, `.vc-serverlabels-font-dropdown`, `.vc-serverlabels-font-option`) with hardcoded hex fallbacks (`#1e1f22`, `#3f4248`); `fontFamily` remains the only inline style since it must be dynamic per-option; `onMouseEnter`/`onMouseLeave` JS handlers removed in favour of CSS `:hover`
+
+**File changes**
+- **`index.ts` renamed to `index.tsx`** — required for JSX; `FontFamilyPicker` is a `function` declaration (hoisted) so `settings` can safely reference it in the `component` lambda above its source position; `React` added to `@webpack/common` imports
+- **`FONT_CATALOG`** — typed `Record<string, FontEntry>` (`{ url: string | null; css: string }`) replacing the old four-option SELECT values; adding or removing a font is one line
+
 ## [0.2.0] — 2026-04-23
 
 ### In-folder height reduction and code cleanup

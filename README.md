@@ -10,12 +10,16 @@ A custom [Vencord](https://github.com/Vendicated/Vencord) plugin that displays s
 - Folder names shown next to folder icons
 - Servers inside colored folders inherit the folder's color on their label
 - Folder color opacity shifts when a folder is open vs. closed, matching Discord's native folder icon behavior
-- Tree branch connector lines for servers nested inside open folders
+- Tree branch connector lines for servers nested inside open folders (optional)
 - Fully clickable labels — clicking navigates to the server or toggles the folder
+- Optional auto-collapse: folders close automatically when you navigate to a server inside them
 - Hover effect and pointer cursor, despite labels being invisible to Discord's event system
 - Long names scroll (marquee) on hover rather than staying truncated
 - Light theme support — labels automatically switch to dark text on a subtle background
-- Adjustable font size, font weight, and max label width via plugin settings
+- Adjustable font size, font weight, max label width, and corner radius style via plugin settings
+- Custom font family — 17 options including Google Fonts, each shown in its own font in the picker
+- Custom font color with theme-adaptive fallback when left blank
+- Sidebar width auto-scales with the Max Width setting
 - Tooltip suppression — Discord's native server-name tooltip is blocked while labels are visible
 - Clean enable/disable — all injected elements and listeners removed on plugin stop
 
@@ -28,7 +32,7 @@ This plugin is installed as a Vencord [user plugin](https://docs.vencord.dev/plu
    ```
    Vencord/src/userplugins/serverLabels/
    ```
-   The folder should contain `index.ts`, `style.css`, and `README.md`.
+   The folder should contain `index.tsx`, `style.css`, and `README.md`.
 3. Rebuild Vencord from the repo root:
    ```
    pnpm build
@@ -44,7 +48,12 @@ This plugin is installed as a Vencord [user plugin](https://docs.vencord.dev/plu
 |---|---|---|
 | Font size | 14px | Label font size (10–20px slider) |
 | Font weight | Normal | Normal, Medium, or Bold |
-| Max width | 160px | Maximum label width before text truncates and marquee activates (80–200px slider) |
+| Max width | 160px | Maximum label width before marquee activates (80–200px slider); also scales sidebar width |
+| Corner radius | Pill | Label corner shape: Pill (16px), Rounded (8px), or Sharp (4px) |
+| Show tree connector | On | Show/hide the L-shaped branch connector for servers inside folders |
+| Auto-collapse folder | Off | Collapse a folder automatically when navigating to a server inside it |
+| Font family | Discord Default | 17 options including Google Fonts; each shown in its own font in the picker |
+| Font color | (blank) | Any CSS color value (e.g. `#ff0000`); leave blank for theme-adaptive defaults |
 
 Settings take effect immediately without toggling the plugin.
 
@@ -66,7 +75,7 @@ Key implementation details:
 
 See [CHANGELOG.md](Vencord/src/userplugins/serverLabels/CHANGELOG.md) for the full version history.
 
-**Current version: v0.2.0**
+**Current version: v0.2.1**
 
 ## License
 
