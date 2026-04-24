@@ -1,5 +1,20 @@
 # ServerLabels Changelog
 
+## [0.2.0] — 2026-04-23
+
+### In-folder height reduction and code cleanup
+
+**Visual**
+- **In-folder server label height reduced to 34px** — changed from 36px to 34px, increasing the size differential between folder labels (38px) and nested server labels; the smaller pill reduces visual weight inside open folders
+
+**Code cleanup**
+- **Consolidated triple `getGuildFolders()` passes in `injectLabel`** — `injectLabel` previously called `getGuildFolders()` three times per guild: once via `getFolderColor()`, once via `isInFolder()`, and once directly to retrieve the parent folder ID; all three are now collapsed into a single `folders.find()` pass that derives `folderColor` and `parentFolderId` together
+- **Removed `isInFolder()` helper** — had a single call site inside `injectLabel`; after the consolidation above it had no remaining callers and was deleted
+- **Removed `patches: []` from `definePlugin`** — passing an empty array is identical to omitting the property; removed to reduce noise
+
+**Documentation**
+- **Stale CSS comment corrected** — comment above the height rules still referenced `39px` for in-folder servers (changed in v0.1.15); updated to reflect the current `34px` value and revised rationale
+
 ## [0.1.16] — 2026-04-23
 
 ### Code review nitpick fixes

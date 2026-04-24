@@ -132,14 +132,6 @@ function getFolderColor(guildId: string): string | null {
     }
 }
 
-function isInFolder(guildId: string): boolean {
-    try {
-        const folders: any[] = SortedGuildStore.getGuildFolders?.() ?? [];
-        return folders.some(f => f.folderId != null && f.guildIds?.includes(guildId));
-    } catch {
-        return false;
-    }
-}
 
 /**
  * Returns the label element (if any) whose bounding rect contains the given point.
@@ -271,7 +263,14 @@ function injectLabel(treeitem: Element) {
     // Don't double-inject
     if (listItem.querySelector(`.${LABEL_CLASS}`)) return;
 
-    const folderColor = getFolderColor(guildId);
+    let folderColor: string | null = null;
+    let parentFolderId: string | null = null;
+    try {
+        const folders: any[] = SortedGuildStore.getGuildFolders?.() ?? [];
+        const parentFolder = folders.find(f => f.guildIds?.includes(guildId));
+        if (parentFolder?.folderColor) folderColor = `#${parentFolder.folderColor.toString(16).padStart(6, "0")}`;
+        if (parentFolder?.folderId != null) parentFolderId = String(parentFolder.folderId);
+    } catch {}
 
     const label = document.createElement("span");
     label.className = LABEL_CLASS;
@@ -287,23 +286,16 @@ function injectLabel(treeitem: Element) {
         label.dataset.hasColor = "true";
     }
 
-    if (isInFolder(guildId)) {
+    if (parentFolderId) {
         label.dataset.inFolder = "true";
-        try {
-            const folders: any[] = SortedGuildStore.getGuildFolders?.() ?? [];
-            const parentFolder = folders.find(f => f.folderId != null && f.guildIds?.includes(guildId));
-            if (parentFolder?.folderId) {
-                const folderId = String(parentFolder.folderId);
-                label.dataset.parentFolderId = folderId;
-                if (!labelsByFolder.has(folderId)) labelsByFolder.set(folderId, new Set());
-                labelsByFolder.get(folderId)!.add(label);
-                // Initialize open state immediately based on current DOM
-                const folderTreeitem = document.querySelector(`[data-list-item-id="guildsnav___${folderId}"]`);
-                if (folderTreeitem?.getAttribute("aria-expanded") === "true") {
-                    label.classList.add("vc-serverlabels-folder-open");
-                }
-            }
-        } catch {}
+        label.dataset.parentFolderId = parentFolderId;
+        if (!labelsByFolder.has(parentFolderId)) labelsByFolder.set(parentFolderId, new Set());
+        labelsByFolder.get(parentFolderId)!.add(label);
+        // Initialize open state immediately based on current DOM
+        const folderTreeitem = document.querySelector(`[data-list-item-id="guildsnav___${parentFolderId}"]`);
+        if (folderTreeitem?.getAttribute("aria-expanded") === "true") {
+            label.classList.add("vc-serverlabels-folder-open");
+        }
     }
 
     // Append the label inside the icon span so it becomes the absolute positioning
@@ -385,7 +377,6 @@ export default definePlugin({
     description: "Displays server names next to their icons in the server list.",
     authors: [{ name: ".dave64", id: 140194457222905856n }],
     settings,
-    patches: [],
 
     start() {
         styleEl = document.createElement("style");

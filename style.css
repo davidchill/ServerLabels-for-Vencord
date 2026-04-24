@@ -65,7 +65,7 @@
 /*
  * Folder labels: 38px — reduced from the 48px folderPreviewWrapper height to reduce empty space.
  * Standalone server labels: 32px base height, border-radius: 16px to match folder style.
- * In-folder servers: 39px — slightly taller than standalone to fill the row better.
+ * In-folder servers: 34px — slightly shorter than folder labels to avoid overlap.
  */
 .vc-serverlabels-name[data-folder-id] {
     height: 38px;
@@ -82,7 +82,7 @@
 .vc-serverlabels-name[data-in-folder="true"] {
     margin-left: 23px;
     border-radius: 4px;
-    height: 36px;
+    height: 34px;
 }
 
 /*
