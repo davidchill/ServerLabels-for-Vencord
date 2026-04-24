@@ -35,27 +35,39 @@ This plugin is installed as a Vencord [user plugin](https://docs.vencord.dev/plu
    The folder should contain `index.tsx`, `style.css`, and `README.md`.
 3. Rebuild Vencord from the repo root:
    ```
-   pnpm build
+   pnpm buildStandalone
    ```
 4. Fully quit and relaunch Discord.
 5. Open **Settings → Vencord → Plugins**, find **ServerLabels**, and enable it.
 
-> **Note:** You only need to run `pnpm inject` once during initial Vencord setup. Subsequent code changes only require `pnpm build` + Discord relaunch.
+> **Note:** You only need to run `pnpm inject` once during initial Vencord setup. Subsequent code changes only require `pnpm buildStandalone` + Discord relaunch.
 
 ## Settings
 
+Settings are grouped into three sections and all take effect immediately without toggling the plugin.
+
+**Typography**
+
 | Setting | Default | Description |
 |---|---|---|
+| Font family | Discord Default | 17 options including Google Fonts; each shown in its own font in the picker |
 | Font size | 14px | Label font size (10–20px slider) |
 | Font weight | Normal | Normal, Medium, or Bold |
+| Text color | (blank) | Any CSS color value (e.g. `#ff0000`); leave blank for theme-adaptive defaults |
+
+**Label Style**
+
+| Setting | Default | Description |
+|---|---|---|
 | Max width | 160px | Maximum label width before marquee activates (80–200px slider); also scales sidebar width |
 | Corner radius | Pill | Label corner shape: Pill (16px), Rounded (8px), or Sharp (4px) |
+
+**Behavior**
+
+| Setting | Default | Description |
+|---|---|---|
 | Show tree connector | On | Show/hide the L-shaped branch connector for servers inside folders |
 | Auto-collapse folder | Off | Collapse a folder automatically when navigating to a server inside it |
-| Font family | Discord Default | 17 options including Google Fonts; each shown in its own font in the picker |
-| Font color | (blank) | Any CSS color value (e.g. `#ff0000`); leave blank for theme-adaptive defaults |
-
-Settings take effect immediately without toggling the plugin.
 
 ## How It Works
 
@@ -73,9 +85,9 @@ Key implementation details:
 
 ## Changelog
 
-See [CHANGELOG.md](Vencord/src/userplugins/serverLabels/CHANGELOG.md) for the full version history.
+See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
-**Current version: v0.2.1**
+**Current version: v0.2.2**
 
 ## License
 

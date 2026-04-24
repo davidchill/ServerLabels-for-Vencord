@@ -39,7 +39,7 @@
     /*
      * pointer-events: none makes all labels invisible to Discord's event system
      * so hovering them never triggers the tooltip. Clicks and hover effects are
-     * handled by document-level listeners in index.ts instead.
+     * handled by document-level listeners in index.tsx instead.
      */
     pointer-events: none;
 }
@@ -166,7 +166,7 @@
 }
 
 /*
- * Hover and active states are driven by JS (document mousemove in index.ts)
+ * Hover and active states are driven by JS (document mousemove in index.tsx)
  * since pointer-events: none prevents CSS :hover from firing.
  */
 .vc-serverlabels-name--hover {
@@ -233,10 +233,11 @@
    ============================================================ */
 
 .vc-serverlabels-font-trigger {
-    background: var(--background-tertiary, #1e1f22);
+    background: var(--input-background, #1e1f22);
     border: 1px solid var(--background-modifier-accent, #3f4248);
-    border-radius: 4px;
-    padding: 8px 12px;
+    border-radius: 3px;
+    padding: 0 12px;
+    height: 36px;
     cursor: pointer;
     display: flex;
     justify-content: space-between;
@@ -244,28 +245,36 @@
     font-size: 14px;
     user-select: none;
     color: var(--text-normal, #dbdee1);
+    box-sizing: border-box;
 }
 
 .vc-serverlabels-font-trigger:hover {
-    background: var(--background-modifier-hover, #2e3035);
+    border-color: var(--text-muted, #80848e);
+}
+
+.vc-serverlabels-font-caret {
+    font-size: 9px;
+    opacity: 0.6;
+    margin-left: 8px;
+    flex-shrink: 0;
 }
 
 .vc-serverlabels-font-dropdown {
     position: absolute;
-    top: calc(100% + 4px);
+    top: calc(100% + 2px);
     left: 0;
     right: 0;
-    background: var(--background-tertiary, #1e1f22);
+    background: var(--background-floating, #18191c);
     border: 1px solid var(--background-modifier-accent, #3f4248);
-    border-radius: 4px;
+    border-radius: 3px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
     z-index: 9999;
-    max-height: 320px;
+    max-height: 280px;
     overflow-y: auto;
 }
 
 .vc-serverlabels-font-option {
-    padding: 10px 14px;
+    padding: 8px 12px;
     cursor: pointer;
     font-size: 14px;
     color: var(--text-normal, #dbdee1);
@@ -277,4 +286,5 @@
 
 .vc-serverlabels-font-option.vc-serverlabels-font-option--selected {
     background: var(--background-modifier-selected, rgba(255, 255, 255, 0.1));
+    color: var(--text-normal, #ffffff);
 }

@@ -41,16 +41,28 @@ const FONT_CATALOG: Record<string, FontEntry> = {
 };
 
 const settings = definePluginSettings({
+    // ── Typography ──────────────────────────────────────────────────────────
+    typographyHeader: {
+        type: OptionType.COMPONENT,
+        description: "",
+        component: () => <SettingsSection title="Typography" />,
+    },
+    fontFamily: {
+        type: OptionType.COMPONENT,
+        description: "Font family",
+        default: "Discord Default",
+        component: () => <FontFamilyPicker />,
+    },
     fontSize: {
         type: OptionType.SLIDER,
-        description: "Font size of server name labels (px)",
+        description: "Font size (px)",
         default: 14,
         markers: [10, 12, 14, 16, 18, 20],
         onChange: () => updateCSSVars(),
     },
     fontWeight: {
         type: OptionType.SELECT,
-        description: "Font weight of server name labels",
+        description: "Font weight",
         options: [
             { label: "Normal", value: "400", default: true },
             { label: "Medium", value: "500" },
@@ -58,22 +70,40 @@ const settings = definePluginSettings({
         ],
         onChange: () => updateCSSVars(),
     },
+    fontColor: {
+        type: OptionType.STRING,
+        description: "Text color — any CSS color (e.g. #ff0000). Leave blank for theme-adaptive defaults.",
+        default: "",
+        onChange: () => updateCSSVars(),
+    },
+    // ── Label Style ─────────────────────────────────────────────────────────
+    labelStyleHeader: {
+        type: OptionType.COMPONENT,
+        description: "",
+        component: () => <SettingsSection title="Label Style" />,
+    },
     maxWidth: {
         type: OptionType.SLIDER,
-        description: "Max width of server name labels (px)",
+        description: "Max width (px)",
         default: 160,
         markers: [80, 100, 120, 150, 160, 180, 200],
         onChange: () => updateCSSVars(),
     },
     labelRadius: {
         type: OptionType.SELECT,
-        description: "Corner radius style for labels",
+        description: "Corner radius",
         options: [
             { label: "Pill", value: "16px", default: true },
             { label: "Rounded", value: "8px" },
             { label: "Sharp", value: "4px" },
         ],
         onChange: () => updateCSSVars(),
+    },
+    // ── Behavior ─────────────────────────────────────────────────────────────
+    behaviorHeader: {
+        type: OptionType.COMPONENT,
+        description: "",
+        component: () => <SettingsSection title="Behavior" />,
     },
     showTreeConnector: {
         type: OptionType.BOOLEAN,
@@ -85,18 +115,6 @@ const settings = definePluginSettings({
         type: OptionType.BOOLEAN,
         description: "Auto-collapse a folder when you navigate to a server inside it",
         default: false,
-    },
-    fontFamily: {
-        type: OptionType.COMPONENT,
-        description: "Font family for labels",
-        default: "Discord Default",
-        component: () => <FontFamilyPicker />,
-    },
-    fontColor: {
-        type: OptionType.STRING,
-        description: "Label text color — any CSS color (e.g. #ff0000). Leave blank to use theme-adaptive defaults.",
-        default: "",
-        onChange: () => updateCSSVars(),
     },
 });
 
@@ -116,7 +134,6 @@ const activeLabels = new Set<HTMLElement>();
 // instead of a full scan of activeLabels on every folder expand/collapse.
 const labelsByFolder = new Map<string, Set<HTMLElement>>();
 
-/** Injects a <link> for every Google Font in the catalog so all previews render immediately. */
 function loadAllFonts() {
     for (const entry of Object.values(FONT_CATALOG)) {
         if (!entry.url) continue;
@@ -133,8 +150,22 @@ function unloadAllFonts() {
     fontLinkEls.length = 0;
 }
 
-// FontFamilyPicker is a function declaration so it is hoisted — the settings object
-// above can safely reference it via the component lambda before this line in source.
+function SettingsSection({ title }: { title: string; }) {
+    return (
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%", marginTop: "4px" }}>
+            <span style={{
+                fontSize: "11px",
+                fontWeight: 700,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                color: "var(--text-normal)",
+                whiteSpace: "nowrap",
+            }}>{title}</span>
+            <div style={{ flex: 1, height: "1px", background: "var(--background-modifier-accent)" }} />
+        </div>
+    );
+}
+
 function FontFamilyPicker() {
     const [isOpen, setIsOpen] = React.useState(false);
     const [selected, setSelected] = React.useState<string>(settings.store.fontFamily ?? "Discord Default");
@@ -159,14 +190,11 @@ function FontFamilyPicker() {
     const currentCss = FONT_CATALOG[selected]?.css ?? "var(--font-primary)";
 
     return (
-        <div ref={containerRef} style={{ position: "relative", maxWidth: "360px" }}>
-            {/* Trigger button — displays current font name in its own font */}
+        <div ref={containerRef} style={{ position: "relative", width: "100%" }}>
             <div className="vc-serverlabels-font-trigger" onClick={() => setIsOpen(o => !o)} style={{ fontFamily: currentCss }}>
                 <span>{selected}</span>
-                <span style={{ opacity: 0.5, fontSize: "10px", marginLeft: "8px" }}>{isOpen ? "▲" : "▼"}</span>
+                <span className="vc-serverlabels-font-caret">{isOpen ? "▲" : "▼"}</span>
             </div>
-
-            {/* Dropdown — each option rendered in its own font */}
             {isOpen && (
                 <div className="vc-serverlabels-font-dropdown">
                     {Object.keys(FONT_CATALOG).map(name => (

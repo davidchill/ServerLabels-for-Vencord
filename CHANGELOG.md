@@ -1,5 +1,26 @@
 # ServerLabels Changelog
 
+## [0.2.2] — 2026-04-24
+
+### Settings page restructuring, font picker restyling, and docs/path cleanup
+
+**Settings page**
+- **Three labelled sections** — settings panel now groups controls under `Typography`, `Label Style`, and `Behavior` section headers; headers are rendered via `OptionType.COMPONENT` entries using a `SettingsSection` React component (bold uppercase label + horizontal rule)
+- **Section header color fixed** — header text uses `var(--text-normal)` instead of `var(--header-secondary)`, which was resolving too dark in dark mode and too light in light mode inside the settings panel context
+- **Setting descriptions shortened** — labels trimmed for compactness (e.g. "Font size of server name labels (px)" → "Font size (px)", "Corner radius style for labels" → "Corner radius")
+
+**Font family picker**
+- **Trigger restyled to match native controls** — height raised to 36px, border-radius tightened to 3px, background changed to `var(--input-background, #1e1f22)` to align with Discord's SELECT appearance; hover now changes border-color rather than background; caret extracted into `.vc-serverlabels-font-caret` class (9px, 0.6 opacity); dropdown gap reduced from 4px to 2px; max-height reduced from 320px to 280px
+- **Per-font previews retained** — `loadAllFonts()` / `FontFamilyPicker` remain intact; all 17 fonts preloaded at plugin start so each option renders in its own typeface immediately
+
+**File structure**
+- **Duplicate plugin folder removed** — `src/plugins/serverLabels/` (created during earlier load debugging) has been deleted; `src/userplugins/serverLabels/` is now the sole working copy
+
+**Documentation**
+- **README** — `pnpm build` corrected to `pnpm buildStandalone` in installation steps and note; settings table reorganized into three grouped sections matching the actual settings page layout; changelog link corrected to relative `CHANGELOG.md`
+- **CLAUDE.md** — plugin path updated from `src/plugins/` to `src/userplugins/`; Files section updated (`index.ts` → `index.tsx`)
+- **style.css** — two inline comments updated from `index.ts` to `index.tsx`
+
 ## [0.2.1] — 2026-04-23
 
 ### Settings & QoL — corner radius, connector toggle, auto-collapse, font family picker, font color, sidebar auto-scaling
