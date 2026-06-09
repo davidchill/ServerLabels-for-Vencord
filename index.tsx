@@ -99,6 +99,13 @@ const fontLinkEls = new Map<string, HTMLLinkElement>();
 let rafId: number | null = null;
 let guildsNav: HTMLElement | null = null;
 let settingsBtn: HTMLElement | null = null;
+// Currently hovered label — tracked so mousemove only updates the 1-2 labels that
+// actually change, instead of toggling the hover class on every label every frame.
+let lastHovered: HTMLElement | null = null;
+// Cached bounding rect of the guild sidebar. Used by mousemove to cheaply skip the
+// whole hit-test when the cursor is nowhere near the sidebar (e.g. in the chat area).
+// Invalidated on window resize and whenever guildsNav is (re)assigned.
+let navRectCache: DOMRect | null = null;
 
 const activeLabels = new Set<HTMLElement>();
 // Secondary index: parentFolderId → labels, so syncFolderOpenState is an O(1) lookup
@@ -325,6 +332,7 @@ function LabelRadiusWidthRow() {
 
 function pruneLabel(el: HTMLElement) {
     activeLabels.delete(el);
+    if (el === lastHovered) lastHovered = null;
     const fid = el.dataset.parentFolderId;
     if (fid) {
         const s = labelsByFolder.get(fid);
@@ -434,21 +442,54 @@ function onDocumentClick(e: MouseEvent) {
     }
 }
 
+/** Clears the current hover state (class + cursor) without touching every label. */
+function clearHover() {
+    if (lastHovered) {
+        lastHovered.classList.remove(LABEL_HOVER_CLASS);
+        lastHovered = null;
+    }
+    if (guildsNav && guildsNav.style.cursor) guildsNav.style.cursor = "";
+}
+
+/** Invalidates the cached sidebar rect (on resize / nav replacement). */
+function onWindowResize() {
+    navRectCache = null;
+}
+
 /**
  * Document-level mousemove handler.
  * Since labels have pointer-events: none, we manually apply the hover class and
  * set the cursor so the user can see the labels are interactive.
  * Throttled to one update per animation frame.
+ *
+ * Two cheap guards keep this off the hot path during normal use:
+ *  1. A region check against the cached sidebar rect — if the cursor isn't near
+ *     the guild list (e.g. you're in a channel), we bail before hit-testing.
+ *  2. Hover changes only touch the label(s) that actually changed, tracked via
+ *     lastHovered, rather than rewriting the class on every label each frame.
  */
 function onDocumentMouseMove(e: MouseEvent) {
     if (rafId !== null) return;
+    const { clientX, clientY } = e;
     rafId = requestAnimationFrame(() => {
         rafId = null;
-        const hovered = labelAtPoint(e.clientX, e.clientY);
-        for (const el of activeLabels) {
-            el.classList.toggle(LABEL_HOVER_CLASS, el === hovered);
+        if (!guildsNav) { clearHover(); return; }
+
+        const rect = navRectCache ??= guildsNav.getBoundingClientRect();
+        // Labels start just right of the icon column and extend up to maxWidth further.
+        const rightBound = rect.right + (settings.store.maxWidth ?? 160) + 40;
+        if (clientX < rect.left || clientX > rightBound || clientY < rect.top || clientY > rect.bottom) {
+            clearHover();
+            return;
         }
-        if (guildsNav) guildsNav.style.cursor = hovered ? "pointer" : "";
+
+        const hovered = labelAtPoint(clientX, clientY);
+        if (hovered !== lastHovered) {
+            lastHovered?.classList.remove(LABEL_HOVER_CLASS);
+            hovered?.classList.add(LABEL_HOVER_CLASS);
+            lastHovered = hovered;
+        }
+        guildsNav.style.cursor = hovered ? "pointer" : "";
     });
 }
 
@@ -634,6 +675,7 @@ function refreshLabelColors() {
     const nav = document.querySelector('nav[class*="guilds"]');
     if (nav && nav !== guildsNav) {
         guildsNav = nav as HTMLElement;
+        navRectCache = null;
         observer?.disconnect();
         observer?.observe(guildsNav, { childList: true, subtree: true, attributes: true, attributeFilter: ["aria-expanded"] });
         applyAllLabels();
@@ -703,6 +745,7 @@ export default definePlugin({
         // Labels have pointer-events: none, so all interaction is handled here.
         document.addEventListener("click", onDocumentClick, true);
         document.addEventListener("mousemove", onDocumentMouseMove);
+        window.addEventListener("resize", onWindowResize);
         SortedGuildStore.addChangeListener(refreshLabelColors);
 
         // Watch for Discord re-rendering the guild list (e.g. new notifications,
@@ -712,15 +755,14 @@ export default definePlugin({
             let folders: any[] | null = null;
             const getFolders = () => folders ??= SortedGuildStore.getGuildFolders?.() ?? [];
 
+            let sawChildList = false;
             for (const mutation of mutations) {
                 if (mutation.type === "attributes" && mutation.attributeName === "aria-expanded") {
                     syncFolderOpenState(mutation.target as Element);
                     continue;
                 }
                 if (mutation.type !== "childList") continue;
-                for (const el of activeLabels) {
-                    if (!el.isConnected) pruneLabel(el);
-                }
+                sawChildList = true;
                 for (const node of mutation.addedNodes) {
                     if (!(node instanceof Element)) continue;
                     if (node.matches(TREEITEM_SELECTOR)) {
@@ -731,6 +773,14 @@ export default definePlugin({
                         injectLabel(el, getFolders());
                         injectFolderLabel(el, getFolders());
                     });
+                }
+            }
+
+            // Prune disconnected labels and re-check the settings button ONCE per
+            // batch, not per mutation record — Discord emits many records per tick.
+            if (sawChildList) {
+                for (const el of activeLabels) {
+                    if (!el.isConnected) pruneLabel(el);
                 }
                 injectSettingsButton();
             }
@@ -747,6 +797,7 @@ export default definePlugin({
                 const n = document.querySelector('nav[class*="guilds"]');
                 if (!n) return;
                 guildsNav = n as HTMLElement;
+                navRectCache = null;
                 navBootstrapObserver!.disconnect();
                 navBootstrapObserver = null;
                 observer?.disconnect();
@@ -764,7 +815,10 @@ export default definePlugin({
         removeSettingsButton();
         document.removeEventListener("click", onDocumentClick, true);
         document.removeEventListener("mousemove", onDocumentMouseMove);
+        window.removeEventListener("resize", onWindowResize);
         SortedGuildStore.removeChangeListener(refreshLabelColors);
+        lastHovered = null;
+        navRectCache = null;
         if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
         navBootstrapObserver?.disconnect();
         navBootstrapObserver = null;

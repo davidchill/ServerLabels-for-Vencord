@@ -1,5 +1,22 @@
 # ServerLabels Changelog
 
+## [0.2.6] — 2026-06-09
+
+### Performance — mousemove hot path and observer batch hoisting
+
+**Mousemove hover handler**
+- **Region early-out before hit-testing** — `onDocumentMouseMove` is bound to `document`, so it fired for all cursor movement anywhere in Discord (including the chat area, far from the sidebar). Each animation frame it called `labelAtPoint()`, which loops every active label calling `getBoundingClientRect()` — a forced synchronous reflow per label, every frame, even when no label was under the cursor. Added a cheap region check against a cached sidebar rect (`navRectCache`): if the cursor's X/Y falls outside the guild list region (`rect.right + maxWidth + 40` on the right), the handler calls `clearHover()` and bails before any per-label hit-testing
+- **Diff-only hover updates** — the handler previously looped all active labels every frame calling `classList.toggle(LABEL_HOVER_CLASS, el === hovered)` — N style writes per frame even when the hovered label hadn't changed. Now a module-level `lastHovered` reference tracks the current hover; on change, the class is removed from the old label and added to the new one only (O(1) writes instead of O(N))
+- **Added `clearHover()` helper** — removes the hover class from `lastHovered` and resets the nav cursor; called from the region early-out and on `stop()`
+- **Rect cache invalidation** — `navRectCache` is cleared on window `resize` (new `onWindowResize` listener registered in `start()`, removed in `stop()`) and whenever `guildsNav` is reassigned (Discord nav replacement in `refreshLabelColors()`, and the bootstrap-observer path in `start()`), so the cached region can never go stale
+- **`pruneLabel()` clears `lastHovered`** — if the hovered label is removed from the DOM (e.g. folder collapse), the stale reference is nulled
+
+**MutationObserver batching**
+- **Disconnected-label prune hoisted to once per batch** — the `for (const el of activeLabels) { if (!el.isConnected) pruneLabel(el); }` loop previously ran inside the per-mutation-record loop; Discord emits many `childList` records per observer callback, so with M records and N labels this was M×N `isConnected` checks per tick. Moved outside the record loop, guarded by a `sawChildList` flag, so it runs at most once per batch
+- **`injectSettingsButton()` hoisted to once per batch** — same restructure; the per-record call (which had a cheap `getElementById` early-out) now runs once per batch alongside the prune
+
+**No functional or visual changes** — labels, hover highlight, marquee scroll, click-to-navigate, folder colors, and the settings button behave identically; this is a pure main-thread work reduction during cursor movement and Discord DOM churn.
+
 ## [0.2.5] — 2026-05-03
 
 ### Performance — font lazy-loading, reduced store calls, cheaper CSS selectors
