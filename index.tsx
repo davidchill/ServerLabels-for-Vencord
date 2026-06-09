@@ -91,6 +91,10 @@ const settings = definePluginSettings({
 const LABEL_CLASS = "vc-serverlabels-name";
 const LABEL_HOVER_CLASS = "vc-serverlabels-name--hover";
 const TREEITEM_SELECTOR = '[data-list-item-id^="guildsnav___"]';
+// Horizontal padding of a label pill: `padding: 0 12px` in style.css → 12px × 2.
+// Hardcoded to avoid a getComputedStyle() per label during marquee measurement.
+// KEEP IN SYNC with the `.vc-serverlabels-name` padding in style.css.
+const H_PAD = 24;
 
 let observer: MutationObserver | null = null;
 let navBootstrapObserver: MutationObserver | null = null;
@@ -106,6 +110,8 @@ let lastHovered: HTMLElement | null = null;
 // whole hit-test when the cursor is nowhere near the sidebar (e.g. in the chat area).
 // Invalidated on window resize and whenever guildsNav is (re)assigned.
 let navRectCache: DOMRect | null = null;
+// Separate rAF handle for batched marquee re-measurement (distinct from the mousemove rafId).
+let measureRafId: number | null = null;
 
 const activeLabels = new Set<HTMLElement>();
 // Secondary index: parentFolderId → labels, so syncFolderOpenState is an O(1) lookup
@@ -354,28 +360,20 @@ function updateCSSVars() {
     }`;
     document.body.classList.toggle("vc-serverlabels-custom-color", !!color);
     // Re-measure after layout settles — max-width changes affect overflow amounts.
-    requestAnimationFrame(remeasureAllMarquees);
+    scheduleRemeasure();
 }
 
 /**
- * Measures how far the inner text span overflows its pill container and stores
- * the result as --marquee-offset. Adds vc-serverlabels-overflow when text is
- * actually clipped so the fade mask and animation only apply when needed.
+ * Schedules a single batched marquee re-measure on the next animation frame.
+ * Coalesces bursts of inject calls (initial load injects many labels at once)
+ * into one read pass + one write pass, instead of one reflow per label.
  */
-function measureMarquee(label: HTMLElement) {
-    if (!label.isConnected) return;
-    const inner = label.querySelector("span") as HTMLElement | null;
-    if (!inner) return;
-    const style = getComputedStyle(label);
-    const hPad = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
-    const overflow = inner.scrollWidth - (label.clientWidth - hPad);
-    if (overflow > 2) {
-        label.style.setProperty("--marquee-offset", `-${overflow}px`);
-        label.classList.add("vc-serverlabels-overflow");
-    } else {
-        label.style.removeProperty("--marquee-offset");
-        label.classList.remove("vc-serverlabels-overflow");
-    }
+function scheduleRemeasure() {
+    if (measureRafId !== null) return;
+    measureRafId = requestAnimationFrame(() => {
+        measureRafId = null;
+        remeasureAllMarquees();
+    });
 }
 
 function remeasureAllMarquees() {
@@ -385,9 +383,7 @@ function remeasureAllMarquees() {
         if (!el.isConnected) continue;
         const inner = el.querySelector("span") as HTMLElement | null;
         if (!inner) continue;
-        const style = getComputedStyle(el);
-        const hPad = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
-        measurements.push([el, inner.scrollWidth - (el.clientWidth - hPad)]);
+        measurements.push([el, inner.scrollWidth - (el.clientWidth - H_PAD)]);
     }
     // Write pass — apply results without interleaving reads
     for (const [el, overflow] of measurements) {
@@ -536,7 +532,7 @@ function injectFolderLabel(treeitem: Element, folders: any[]) {
 
         treeitem.appendChild(label);
         activeLabels.add(label);
-        requestAnimationFrame(() => measureMarquee(label));
+        scheduleRemeasure();
     } catch {
         return;
     }
@@ -614,7 +610,7 @@ function injectLabel(treeitem: Element, folders: any[]) {
     // listeners registered in start() to avoid triggering Discord's tooltip.
     iconSpan.appendChild(label);
     activeLabels.add(label);
-    requestAnimationFrame(() => measureMarquee(label));
+    scheduleRemeasure();
 }
 
 function injectSettingsButton() {
@@ -820,6 +816,7 @@ export default definePlugin({
         lastHovered = null;
         navRectCache = null;
         if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+        if (measureRafId !== null) { cancelAnimationFrame(measureRafId); measureRafId = null; }
         navBootstrapObserver?.disconnect();
         navBootstrapObserver = null;
         observer?.disconnect();

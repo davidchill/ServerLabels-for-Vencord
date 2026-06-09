@@ -81,14 +81,14 @@ Key implementation details:
 - **CSS variable injection** — Settings are written into a `<style>` tag in `<head>` rather than inline on `document.documentElement`. Discord periodically rewrites the root element's `style` attribute for its own theming, which would silently wipe inline custom properties.
 - **Folder color** — `SortedGuildStore` is used to look up each guild's parent folder and extract `folderColor` (a raw integer), which is converted to a hex CSS string and applied as an inline `--serverlabels-folder-color` variable. In dark theme, opacity is 40% closed / 20% open; in light theme it's bumped to 60% / 40% so dark folder colors remain legible on Discord's white background. State is driven by `aria-expanded` observation rather than CSS structural selectors (which can't reach sibling subtrees).
 - **Folder open state sync** — The observer watches `aria-expanded` attribute changes on folder treeitems. A `Map<folderId, Set<label>>` index makes each sync an O(1) lookup rather than a full scan of all active labels.
-- **Marquee scroll** — After each label is injected, `measureMarquee()` runs in a `requestAnimationFrame` to check whether the text overflows the pill width. If it does, `--marquee-offset` is set and a CSS animation scrolls the inner text span left-to-right on hover. Re-measurement is batched into a read pass then a write pass to avoid layout thrashing.
+- **Marquee scroll** — After labels are injected, a single batched `requestAnimationFrame` (`scheduleRemeasure()`) checks which labels overflow the pill width. Overflowing labels get a `--marquee-offset` and a CSS animation scrolls the inner text span left-to-right on hover. Measurement runs as one read pass then one write pass across all labels to avoid layout thrashing, and bursts of injections coalesce into a single reflow rather than one per label.
 - **Light theme** — Discord adds `.theme-light` to `<html>` when the light theme is active. The CSS uses this class to switch labels to dark text on a subtle dark-tinted background.
 
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
-**Current version: v0.2.6**
+**Current version: v0.2.7**
 
 ## License
 

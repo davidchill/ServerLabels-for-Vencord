@@ -1,5 +1,20 @@
 # ServerLabels Changelog
 
+## [0.2.7] — 2026-06-09
+
+### Performance — marquee measurement: hardcoded padding and coalesced re-measure
+
+**Padding constant (reverts the v0.1.14 runtime-derivation change)**
+- **`getComputedStyle()` removed from the marquee measurement path** — `remeasureAllMarquees()` previously called `getComputedStyle(el)` per label just to read horizontal padding (`paddingLeft + paddingRight`), forcing a style resolution for every label on each measure. Replaced with a module-level `const H_PAD = 24` (the label pill's `padding: 0 12px` → 12px × 2), commented to stay in sync with `style.css`. This intentionally reverts the v0.1.14 decision to derive padding at runtime; padding has been stable for many versions and the constant is now guarded by a comment
+
+**Coalesced re-measurement**
+- **Single batched rAF instead of one per injected label** — `injectLabel()` and `injectFolderLabel()` each previously ended with their own `requestAnimationFrame(() => measureMarquee(label))`. On initial load (many labels injected at once) this scheduled N separate callbacks, each independently reading `scrollWidth` then writing styles — interleaved reads/writes causing layout thrash. Both now call a new `scheduleRemeasure()` that schedules a single rAF running `remeasureAllMarquees()` (one read pass + one write pass = one reflow instead of N)
+- **`updateCSSVars()` routed through the same scheduler** — its `requestAnimationFrame(remeasureAllMarquees)` replaced with `scheduleRemeasure()`, so a settings change and a label injection in the same frame collapse into one re-measure
+- **Single-label `measureMarquee()` removed** — no longer referenced after the above; its overflow logic already lives inline in `remeasureAllMarquees()`
+- **New `measureRafId` handle** — distinct from the mousemove `rafId`; cancelled in `stop()` to prevent a leak across plugin stop/start cycles
+
+**No functional or visual changes** — label truncation fade and hover marquee behave identically; this is a main-thread work reduction during initial sidebar paint and settings changes.
+
 ## [0.2.6] — 2026-06-09
 
 ### Performance — mousemove hot path and observer batch hoisting
