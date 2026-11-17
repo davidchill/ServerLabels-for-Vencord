@@ -1,0 +1,4 @@
+# AI agent context files (local only, not part of the plugin)
+CLAUDE.md
+AGENTS.md
+.claude/
