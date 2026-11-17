@@ -9,6 +9,7 @@ import "./style.css";
 import { definePluginSettings } from "@api/Settings";
 import { openPluginModal } from "@components/settings/tabs/plugins/PluginModal";
 import definePlugin, { OptionType } from "@utils/types";
+import type { SelectOption } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
 import { Forms, GuildStore, NavigationRouter, React, SearchableSelect, Select, Slider, TextInput } from "@webpack/common";
 
@@ -86,6 +87,16 @@ const settings = definePluginSettings({
         description: "Auto-collapse a folder when you navigate to a server inside it",
         default: false,
     },
+    // ── Stored values (edited by the row components above) ──────────────────
+    // OptionType.CUSTOM keeps these out of the settings panel, which renders
+    // its own controls for them. Each default matches the fallback used
+    // wherever the value is read; saved values always take precedence.
+    fontFamily: { type: OptionType.CUSTOM, default: "Discord Default" },
+    fontColor: { type: OptionType.CUSTOM, default: "" },
+    fontSize: { type: OptionType.CUSTOM, default: 14 },
+    fontWeight: { type: OptionType.CUSTOM, default: "400" },
+    labelRadius: { type: OptionType.CUSTOM, default: "16px" },
+    maxWidth: { type: OptionType.CUSTOM, default: 160 },
 });
 
 const LABEL_CLASS = "vc-serverlabels-name";
@@ -164,6 +175,14 @@ function SettingsSection({ title }: { title: string; }) {
     );
 }
 
+// Vencord's SearchableSelect type omits renderOptionLabel / renderOptionValue,
+// which Discord's component accepts (they draw each font name in its own
+// typeface). This widens the type only; it is the same component at runtime.
+const FontSearchableSelect = SearchableSelect as React.ComponentType<React.ComponentProps<typeof SearchableSelect> & {
+    renderOptionLabel?(option: SelectOption): React.ReactNode;
+    renderOptionValue?(options: SelectOption[]): React.ReactNode;
+}>;
+
 function FontFamilyPicker() {
     const [selected, setSelected] = React.useState<string>(settings.store.fontFamily ?? "Discord Default");
 
@@ -175,7 +194,7 @@ function FontFamilyPicker() {
     const fontOptions = Object.keys(FONT_CATALOG).map(name => ({ label: name, value: name }));
 
     return (
-        <SearchableSelect
+        <FontSearchableSelect
             options={fontOptions}
             value={fontOptions.find(o => o.value === selected)?.value}
             onChange={(v: string) => {

@@ -1,5 +1,22 @@
 # ServerLabels Changelog
 
+## [0.2.8] — 2026-11-17
+
+### Type fixes — declared stored settings and widened the font picker's prop type
+
+**Undeclared settings (21 errors)**
+- **Six stored values now declared in `definePluginSettings`** — `fontFamily`, `fontColor`, `fontSize`, `fontWeight`, `labelRadius`, and `maxWidth` were read and written through `settings.store.*` by the custom two-column row components (`FontFamilyColorRow`, `FontSizeWeightRow`, `LabelRadiusWidthRow`) but never declared, so `tsc` reported `Property '…' does not exist on type 'SettingsStore<…>'` at all 21 access sites. Each is now declared as `OptionType.CUSTOM`, which Vencord's plugin settings modal never renders (`PluginModal.tsx` skips `CUSTOM` and `hidden` options), so the settings panel is unchanged
+- **Defaults match the existing fallbacks** — `"Discord Default"`, `""`, `14`, `"400"`, `"16px"`, and `160`, the same values the read sites already used via `??`. Vencord only consults a declared default when the key has never been saved (`!(key in target)` in `SettingsStore`), so previously saved values are kept as-is. The `??` fallbacks are left in place
+- **Value types now inferred** — `OptionType.CUSTOM` infers each value's type from its `default`, so the store is typed `string` / `number` at every read and write
+
+**Font picker prop type (1 error)**
+- **`FontSearchableSelect` type alias** — Vencord's `SearchableSelect` type in `@vencord/discord-types` omits `renderOptionLabel` / `renderOptionValue` (its plain `Select` type includes them), which `FontFamilyPicker` passes to draw each font name in its own typeface. Added `FontSearchableSelect`, the same component cast to a widened prop type, plus a type-only `import type { SelectOption } from "@vencord/discord-types"`. Both props are passed unchanged
+
+**Repository**
+- **`.gitignore` added** (untagged chore commit `5bf87df`) — excludes local AI-agent context files: `CLAUDE.md`, `AGENTS.md`, `.claude/`
+
+**No functional or visual changes** — `tsc --noEmit` now reports 0 errors for the plugin (was 22). Labels, the settings panel, saved settings, and the per-font dropdown previews behave identically (verified in Discord).
+
 ## [0.2.7] — 2026-06-09
 
 ### Performance — marquee measurement: hardcoded padding and coalesced re-measure

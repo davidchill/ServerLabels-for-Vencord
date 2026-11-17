@@ -54,14 +54,14 @@ Settings are grouped into three sections and all take effect immediately without
 | Font family | Discord Default | 17 options including Google Fonts; each shown in its own font in the picker |
 | Font size | 14px | Label font size (10–20px slider) |
 | Font weight | Normal | Normal, Medium, or Bold |
-| Text color | (blank) | Any CSS color value (e.g. `#ff0000`); leave blank for theme-adaptive defaults |
+| Font color | (blank) | Any CSS color value (e.g. `#ff0000`); leave blank for theme-adaptive defaults |
 
 **Label Style**
 
 | Setting | Default | Description |
 |---|---|---|
 | Max width | 160px | Maximum label width before marquee activates (80–200px slider); also scales sidebar width |
-| Corner radius | Pill | Label corner shape: Pill (16px), Rounded (8px), or Sharp (4px) |
+| Label radius | Pill | Label corner shape: Pill (16px), Rounded (8px), or Sharp (4px) |
 
 **Behavior**
 
@@ -78,6 +78,7 @@ Key implementation details:
 
 - **DOM injection** — Labels are appended inside the icon `<span>` (not after it), making the icon span the absolute positioning anchor. This preserves Discord's native icon centering without any layout hacks.
 - **pointer-events: none** — Labels are invisible to Discord's event system. Clicks and hover effects are handled by document-level listeners that check bounding rects manually (`labelAtPoint()`). This is the only reliable way to suppress Discord's React-delegated tooltips. The `mousemove` handler short-circuits via a cached sidebar rect when the cursor is nowhere near the guild list, and only updates the hover class on the label that actually changed — so per-frame work stays minimal even while moving the mouse elsewhere in Discord.
+- **Settings storage** — The Typography and Label Style controls are custom two-column React rows that read and write `settings.store` directly. The six values they edit are declared as `OptionType.CUSTOM` in `definePluginSettings`, which types them for TypeScript while keeping Vencord from rendering its own duplicate controls.
 - **CSS variable injection** — Settings are written into a `<style>` tag in `<head>` rather than inline on `document.documentElement`. Discord periodically rewrites the root element's `style` attribute for its own theming, which would silently wipe inline custom properties.
 - **Folder color** — `SortedGuildStore` is used to look up each guild's parent folder and extract `folderColor` (a raw integer), which is converted to a hex CSS string and applied as an inline `--serverlabels-folder-color` variable. In dark theme, opacity is 40% closed / 20% open; in light theme it's bumped to 60% / 40% so dark folder colors remain legible on Discord's white background. State is driven by `aria-expanded` observation rather than CSS structural selectors (which can't reach sibling subtrees).
 - **Folder open state sync** — The observer watches `aria-expanded` attribute changes on folder treeitems. A `Map<folderId, Set<label>>` index makes each sync an O(1) lookup rather than a full scan of all active labels.
@@ -88,7 +89,7 @@ Key implementation details:
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
-**Current version: v0.2.7**
+**Current version: v0.2.8**
 
 ## License
 
