@@ -1,5 +1,18 @@
 # ServerLabels Changelog
 
+## [0.2.9] — 2026-11-17
+
+### Lint fixes — Vencord ESLint style rules (19 errors → 0)
+
+**Font table alignment (17 errors, `@stylistic/no-multi-spaces`)**
+- **`FONT_CATALOG` padding collapsed** — each entry padded its `url` value with runs of spaces so the `css:` values lined up in a column. Vencord's ESLint config forbids multiple spaces between tokens, so the padding before each `css:` is now a single space. The font-name column stays aligned (the rule exempts the gap between an object key and its value), and new fonts no longer need hand-padding. All 17 entries, URLs, and CSS values are unchanged
+
+**Settings button (2 errors)**
+- **SVG icon string: backticks → single quotes** (`@stylistic/quotes`) — the gear icon's `innerHTML` was a template literal with no `${}` substitutions, which Vencord's config (`"double"`, `avoidEscape: true`) disallows. It is now single-quoted, which `avoidEscape` permits because the markup contains double quotes. This avoids ESLint's own autofix, which would have escaped every inner `"` as `\"`. The string has no backslashes, `$`, or single quotes, so its value is byte-identical
+- **`plugins?.["ServerLabels"]` → `plugins?.ServerLabels`** (`@typescript-eslint/dot-notation`) — the plugin lookup the button's click handler uses to open the settings modal; same property, same optional chaining
+
+**No functional or visual changes** — ESLint now reports 0 errors for the plugin (was 19), and `tsc --noEmit` still reports 0. The old and new `FONT_CATALOG` objects and SVG strings were evaluated and compared as values (identical), and `git diff -w` shows only the two delimiter/notation lines. Labels, the settings button and its modal, and the font picker previews behave identically (verified in Discord).
+
 ## [0.2.8] — 2026-11-17
 
 ### Type fixes — declared stored settings and widened the font picker's prop type

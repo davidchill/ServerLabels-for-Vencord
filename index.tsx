@@ -18,28 +18,28 @@ const SortedGuildStore = findStoreLazy("SortedGuildStore");
 interface FontEntry { url: string | null; css: string; }
 const FONT_CATALOG: Record<string, FontEntry> = {
     // Special
-    "Discord Default":  { url: null,                                                                                               css: "var(--font-primary)" },
+    "Discord Default":  { url: null, css: "var(--font-primary)" },
     // Clean & modern
-    "Inter":            { url: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap",                    css: '"Inter", sans-serif' },
-    "Roboto":           { url: "https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap",                   css: '"Roboto", sans-serif' },
-    "Poppins":          { url: "https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap",                  css: '"Poppins", sans-serif' },
-    "Nunito":           { url: "https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;700&display=swap",                   css: '"Nunito", sans-serif' },
-    "DM Sans":          { url: "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap",                  css: '"DM Sans", sans-serif' },
-    "Lato":             { url: "https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap",                         css: '"Lato", sans-serif' },
+    "Inter":            { url: "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap", css: '"Inter", sans-serif' },
+    "Roboto":           { url: "https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap", css: '"Roboto", sans-serif' },
+    "Poppins":          { url: "https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap", css: '"Poppins", sans-serif' },
+    "Nunito":           { url: "https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;700&display=swap", css: '"Nunito", sans-serif' },
+    "DM Sans":          { url: "https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap", css: '"DM Sans", sans-serif' },
+    "Lato":             { url: "https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap", css: '"Lato", sans-serif' },
     // Bold & dramatic
-    "Oswald":           { url: "https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&display=swap",                   css: '"Oswald", sans-serif' },
-    "Bebas Neue":       { url: "https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap",                                css: '"Bebas Neue", sans-serif' },
+    "Oswald":           { url: "https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;700&display=swap", css: '"Oswald", sans-serif' },
+    "Bebas Neue":       { url: "https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap", css: '"Bebas Neue", sans-serif' },
     // Stylish
-    "Playfair Display": { url: "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap",             css: '"Playfair Display", serif' },
+    "Playfair Display": { url: "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap", css: '"Playfair Display", serif' },
     // Fun & expressive
-    "Pacifico":         { url: "https://fonts.googleapis.com/css2?family=Pacifico&display=swap",                                  css: '"Pacifico", cursive' },
-    "Lobster":          { url: "https://fonts.googleapis.com/css2?family=Lobster&display=swap",                                   css: '"Lobster", cursive' },
-    "Dancing Script":   { url: "https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap",               css: '"Dancing Script", cursive' },
-    "Righteous":        { url: "https://fonts.googleapis.com/css2?family=Righteous&display=swap",                                 css: '"Righteous", cursive' },
-    "Bangers":          { url: "https://fonts.googleapis.com/css2?family=Bangers&display=swap",                                   css: '"Bangers", cursive' },
+    "Pacifico":         { url: "https://fonts.googleapis.com/css2?family=Pacifico&display=swap", css: '"Pacifico", cursive' },
+    "Lobster":          { url: "https://fonts.googleapis.com/css2?family=Lobster&display=swap", css: '"Lobster", cursive' },
+    "Dancing Script":   { url: "https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap", css: '"Dancing Script", cursive' },
+    "Righteous":        { url: "https://fonts.googleapis.com/css2?family=Righteous&display=swap", css: '"Righteous", cursive' },
+    "Bangers":          { url: "https://fonts.googleapis.com/css2?family=Bangers&display=swap", css: '"Bangers", cursive' },
     // Techy
-    "Space Mono":       { url: "https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap",                   css: '"Space Mono", monospace' },
-    "Press Start 2P":   { url: "https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap",                            css: '"Press Start 2P", monospace' },
+    "Space Mono":       { url: "https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap", css: '"Space Mono", monospace' },
+    "Press Start 2P":   { url: "https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap", css: '"Press Start 2P", monospace' },
 };
 
 const settings = definePluginSettings({
@@ -653,11 +653,11 @@ function injectSettingsButton() {
     btn.className = "vc-serverlabels-settings-btn";
     btn.setAttribute("aria-label", "Open ServerLabels Settings");
     btn.style.top = `${topOffset}px`;
-    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94L14.4 2.81c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41L9.25 5.35c-.59.24-1.13.56-1.62.94L5.24 5.33c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.22-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94L2.84 14.52c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.03-1.58ZM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6Z"/></svg>`;
+    btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94L14.4 2.81c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41L9.25 5.35c-.59.24-1.13.56-1.62.94L5.24 5.33c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.22-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94L2.84 14.52c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.03-1.58ZM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6Z"/></svg>';
     btn.addEventListener("click", e => {
         e.stopPropagation();
         e.preventDefault();
-        const plugin = (window as any).Vencord?.Plugins?.plugins?.["ServerLabels"];
+        const plugin = (window as any).Vencord?.Plugins?.plugins?.ServerLabels;
         if (plugin) openPluginModal(plugin);
     });
 
