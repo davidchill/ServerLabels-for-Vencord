@@ -1,5 +1,19 @@
 # ServerLabels Changelog
 
+## [0.2.10] — 2026-11-18
+
+### Compatibility — Vencord v1.15: `Forms.FormTitle` → `Heading`
+
+**Settings section headers**
+- **`Forms` removed from the `@webpack/common` import** — Vencord v1.15.14 ("Finish migration to new components", Vencord PR #3802) deleted the `Forms` export (Discord's internal `FormTitle` / `FormText` / … components), so the v0.2.9 import failed and the whole Vencord build stopped with it
+- **`SettingsSection` now renders Vencord's own `Heading`** — imported from `@components/Heading`, used as `<Heading tag="h5" style={{ margin: 0, whiteSpace: "nowrap" }}>` with the same props and inline style as before. `Heading` is built on Vencord's `Text` component (h5 = 16px, medium weight, `--text-default` colour) instead of a Discord internal found at runtime, so it no longer depends on where Discord keeps its form components
+- **Compatibility window** — `@components/Heading` has existed since Vencord v1.13.3, so this version builds on v1.13.3 and newer (tested on v1.15.18). v0.2.9 and earlier fail to build on v1.15.14+
+
+**README**
+- **Install instructions use `pnpm build`, not `pnpm buildStandalone`** — a standalone build gets Vencord's HTTP updater, which downloads the official release over `dist/` on the next Vencord update and drops every user plugin. A plain `pnpm build` gets the git updater, which pulls and rebuilds the local source, so user plugins survive
+
+**No other changes** — the section headers (Typography, Label Style, Behavior) keep their divider line and spacing, and the visual check in Discord passed. oxlint and `tsc --noEmit` (`pnpm test:ts`) both report 0 errors for the plugin.
+
 ## [0.2.9] — 2026-11-17
 
 ### Lint fixes — Vencord ESLint style rules (19 errors → 0)

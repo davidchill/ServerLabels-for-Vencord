@@ -26,7 +26,7 @@ A custom [Vencord](https://github.com/Vendicated/Vencord) plugin that displays s
 
 ## Installation
 
-This plugin is installed as a Vencord [user plugin](https://docs.vencord.dev/plugins/creating-plugins/).
+This plugin is installed as a Vencord [user plugin](https://docs.vencord.dev/plugins/creating-plugins/). It requires Vencord v1.13.3 or newer (tested on v1.15.18).
 
 1. Clone or download this repository.
 2. Copy the `serverLabels` plugin folder into your Vencord source tree:
@@ -36,12 +36,14 @@ This plugin is installed as a Vencord [user plugin](https://docs.vencord.dev/plu
    The folder should contain `index.tsx`, `style.css`, and `README.md`.
 3. Rebuild Vencord from the repo root:
    ```
-   pnpm buildStandalone
+   pnpm build
    ```
 4. Fully quit and relaunch Discord.
 5. Open **Settings → Vencord → Plugins**, find **ServerLabels**, and enable it.
 
-> **Note:** You only need to run `pnpm inject` once during initial Vencord setup. Subsequent code changes only require `pnpm buildStandalone` + Discord relaunch.
+> **Note:** You only need to run `pnpm inject` once during initial Vencord setup. Subsequent code changes only require `pnpm build` + Discord relaunch.
+>
+> Don't use `pnpm buildStandalone` for a build that has user plugins. A standalone build updates itself by downloading the official Vencord release over `dist/`, which removes every user plugin. A plain `pnpm build` updates through git and rebuilds your local source, so the plugins stay.
 
 ## Settings
 
@@ -89,7 +91,7 @@ Key implementation details:
 
 See [CHANGELOG.md](CHANGELOG.md) for the full version history.
 
-**Current version: v0.2.9**
+**Current version: v0.2.10**
 
 ## License
 

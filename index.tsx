@@ -7,11 +7,12 @@
 import "./style.css";
 
 import { definePluginSettings } from "@api/Settings";
+import { Heading } from "@components/Heading";
 import { openPluginModal } from "@components/settings/tabs/plugins/PluginModal";
 import definePlugin, { OptionType } from "@utils/types";
 import type { SelectOption } from "@vencord/discord-types";
 import { findStoreLazy } from "@webpack";
-import { Forms, GuildStore, NavigationRouter, React, SearchableSelect, Select, Slider, TextInput } from "@webpack/common";
+import { GuildStore, NavigationRouter, React, SearchableSelect, Select, Slider, TextInput } from "@webpack/common";
 
 const SortedGuildStore = findStoreLazy("SortedGuildStore");
 
@@ -169,7 +170,7 @@ function unloadNonSelectedFonts() {
 function SettingsSection({ title }: { title: string; }) {
     return (
         <div style={{ display: "flex", alignItems: "center", gap: "8px", width: "100%", marginTop: "4px" }}>
-            <Forms.FormTitle tag="h5" style={{ margin: 0, whiteSpace: "nowrap" }}>{title}</Forms.FormTitle>
+            <Heading tag="h5" style={{ margin: 0, whiteSpace: "nowrap" }}>{title}</Heading>
             <div style={{ flex: 1, height: "1px", background: "var(--background-modifier-accent)" }} />
         </div>
     );
